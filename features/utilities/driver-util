@@ -1,0 +1,139 @@
+const { driver } = require('./driver');
+const { By, Key, until } = require('selenium-webdriver');
+
+const driverUtil = {};
+
+driverUtil.BY = {
+    XPATH: 'XPATH',
+    CSS: 'CSS',
+    SCRIPT: 'SCRIPT',
+    NAME: 'NAME'
+};
+
+driverUtil.WAIT = {
+    UNIT00: 250,
+    UNIT0: 500,
+    UNIT1: 1000,
+    UNIT2: 2000,
+    UNIT3: 3000,
+    UNIT4: 4000,
+    UNIT5: 5000,
+    UNIT6: 6000,
+    UNIT7: 7000,
+    UNIT8: 8000,
+    UNIT9: 9000,
+    UNIT10: 10000
+};
+
+driverUtil.find = async function (by) {
+    console.log('find:by', by);
+    return new Promise(async (resolve, reject) => {
+        await driver.findElement(by).then((ele) => {
+            resolve(ele);
+        });
+        reject(null);
+    });
+};
+
+driverUtil.click = async function (by) {
+    console.log('click:by', by);
+    await driverUtil.sleepDriver(driverUtil.WAIT.UNIT1);
+    await driver.findElement(by).then((ele) => {
+        ele.click();
+    });
+};
+
+driverUtil.clickJS = async function (selectorVal) {
+    console.log('clickJS:selectorVal', selectorVal);
+    await driverUtil.sleepDriver(driverUtil.WAIT.UNIT1);
+    await driver.executeScript(function () {
+        document.querySelector(arguments[0]).click();
+        return;
+    }, selectorVal);
+
+};
+
+driverUtil.text = async function (by) {
+    console.log('text:by', by);
+    return await driver.findElement(by).getText();
+    // return new Promise(async (resolve, reject) => {
+    //     await driver.findElement(By.xpath(this.selectorVal)).getText().then((text) => {
+    //         resolve(text);
+    //     });
+    // });
+};
+
+driverUtil.textJS = function (selectorVal) {
+    console.log('textJS:selectorVal', selectorVal);
+    return new Promise(async (resolve, reject) => {
+        const text = await driver.executeScript(function () {
+            return document.querySelector(arguments[0]).innerText;
+        }, selectorVal);
+        resolve(text);
+    });
+};
+
+driverUtil.getInnerHTML = function (cssSelector) {
+    console.log('getInnerHTML:cssSelector', cssSelector);
+    return new Promise(async (resolve, reject) => {
+        const text = await driver.executeScript(function () {
+            return document.querySelector(arguments[0]).innerHTML;
+        }, cssSelector);
+        resolve(text);
+    });
+};
+
+driverUtil.clear = async function (by) {
+    console.log('clear:by', by);
+    await driver.findElement(by)
+        .then((el) => {
+            el.clear();
+        });
+};
+
+driverUtil.sendKeys = async function (by = null, data = null) {
+    console.log('sendKeys: by, data => ', by, data);
+    await driverUtil.sleepDriver(driverUtil.WAIT.UNIT1);
+    await driver.findElement(by).then((ele) => {
+        ele.sendKeys(data);
+    });
+};
+
+
+driverUtil.sendEnter = async function (by) {
+    console.log('sendEnter:by', by);
+    await driverUtil.sleepDriver(driverUtil.WAIT.UNIT0);
+    await driver.findElement(by).sendKeys(Key.ENTER);
+};
+
+driverUtil.sendTab = async function (by) {
+    console.log('sendEnter:by', by);
+    await driverUtil.sleepDriver(driverUtil.WAIT.UNIT0);
+    await driver.findElement(by).sendKeys(Key.TAB);
+};
+
+
+driverUtil.sendKeysJS = function (param = { selector: null, data: null }) {
+    console.log('sendKeysJS:param', param);
+    return new Promise(async (resolve, reject) => {
+        await driver.executeScript(function () {
+            document.querySelector(arguments[0]).value = arguments[1];
+            return;
+        }, param.selector, param.data);
+        resolve(true);
+    });
+};
+
+driverUtil.wait = async function (by) {
+    await driver.wait(until.elementLocated(by), 10000);
+};
+
+driverUtil.executeJS = async function (script, args) {
+    await driver.executeScript(script, args = null);
+};
+
+driverUtil.sleepDriver = async function (WAITFOR) {
+    await driver.sleep(WAITFOR);
+};
+
+module.exports = driverUtil;
